@@ -1,34 +1,13 @@
 import 'phaser';
+import Loading from './scenes/Loading';
+import MainMenu from './scenes/MainMenu';
+import Game from './scenes/Game';
 
-var config = {
-    type: Phaser.AUTO,
-    parent: 'game',
+var game = new Phaser.Game({
+    type: Phaser.AUTO, // Choose WebGL or Canvas automatically
+    parent: 'game', // The ID of the div in index.html
     width: 960,
     height: 540,
-    scene: {
-        preload: preload,
-        create: create
-    }
-};
+    scene: [Loading, MainMenu, Game]
+});
 
-var game = new Phaser.Game(config);
-
-function preload ()
-{
-    this.load.image('logo', 'assets/logo.png');
-}
-
-function create ()
-{
-    var logo = this.add.image(400, 150, 'logo');
-
-    this.tweens.add({
-        targets: logo,
-        y: 450,
-        duration: 2000,
-        ease: 'Power2',
-        yoyo: true,
-        loop: -1
-    });
-
-}
