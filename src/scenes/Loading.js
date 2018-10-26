@@ -29,7 +29,7 @@ class Loading extends Phaser.Scene {
     	var loadingText = this.createText();
 
     	this.load.on('progress', function (value) {
-    		loadingText.text = value.toFixed(2) + " %";
+    		loadingText.text = value.toFixed(2) * 100 + " %";
     	});
 
     	this.load.on('complete', function () {

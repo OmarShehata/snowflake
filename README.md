@@ -18,9 +18,6 @@ Run next commands in your terminal:
 
 ## Todo
 
-* Activate Matterjs physics and add one body
-* Add a ground
-* Associate graphics with each body
 * Move around with arrow keys/WASD 
 * Move camera 
 * Experiment with snow forming
