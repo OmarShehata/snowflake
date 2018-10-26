@@ -8,6 +8,15 @@ var game = new Phaser.Game({
     parent: 'game', // The ID of the div in index.html
     width: 1280,
     height: 720,
-    scene: [Loading, MainMenu, Game]
+    scene: [Loading, MainMenu, Game],
+    physics: {
+        default: 'matter',
+        matter: {
+            gravity: {
+                x: 0,
+                y: 15
+            }
+        }
+    }
 });
 

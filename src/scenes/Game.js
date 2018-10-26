@@ -11,16 +11,14 @@ class Game extends Phaser.Scene {
     }
 
     create() {
-    	var logo = this.add.image(400, 150, 'logo');
+    	var W = this.game.config.width * 2;
+    	var H = this.game.config.height;
 
-	    this.tweens.add({
-	        targets: logo,
-	        y: 450,
-	        duration: 2000,
-	        ease: 'Power2',
-	        yoyo: true,
-	        loop: -1
-	    });
+    	this.matter.world.setBounds(0, 0, W, H);
+
+    	this.matter.add.image(400, 0, 'block').setBounce(0.8).setMass(60);
+
+    	this.matter.add.mouseSpring();
     }
 }
 

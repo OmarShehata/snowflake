@@ -21,12 +21,15 @@ class Loading extends Phaser.Scene {
     	// We can still load assets in each scene, but I think it might be best to load the 
     	// heavy stuff here up front 
     	this.load.image('logo', 'assets/logo.png');
-    	var that = this;
+    	this.load.image('block', 'assets/block.png');
+    	this.load.image('blue', 'assets/particles/blue.png');
+    	this.load.image('white', 'assets/particles/white.png');
+    	this.load.image('yellow', 'assets/particles/yellow.png');
 
     	var loadingText = this.createText();
 
     	this.load.on('progress', function (value) {
-    		loadingText.text = value + " %";
+    		loadingText.text = value.toFixed(2) + " %";
     	});
 
     	this.load.on('complete', function () {

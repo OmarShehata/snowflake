@@ -22,6 +22,7 @@ Run next commands in your terminal:
 * Add a ground
 * Associate graphics with each body
 * Move around with arrow keys/WASD 
+* Move camera 
 * Experiment with snow forming
 	* Create distance joints when close enough, break when too much force?
 	* Try the attractors plugin and have them all constantly try to attract to core?
