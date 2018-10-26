@@ -7,13 +7,10 @@ class Game extends Phaser.Scene {
     }
 
     preload() {
-    	this.load.image('logo', 'assets/logo.png');
-    	console.log("Preload game")
+    	
     }
 
     create() {
-    	console.log("Game!");
-
     	var logo = this.add.image(400, 150, 'logo');
 
 	    this.tweens.add({
