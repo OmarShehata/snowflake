@@ -29,19 +29,33 @@ class Game extends Phaser.Scene {
     	return this.matter.add.fromVertices(x, y, verts, { isStatic: true }, true);
     }
 
+    createParticle(x,y) {
+    	let p = this.matter.add.image(x,y, 'white', null, 
+    		{shape: {
+    			type: 'polygon',
+    			radius: 15
+    		}})
+
+    	//p.setCircle(20);
+    	p.setScale(0.7);
+    	p.setOrigin(0.5);
+    	p.setFriction(0.97);
+    	p.setBlendMode('ADD');
+    	return p;
+    }
+
     create() {    	
     	this.initKeys();
-
-    	console.log("Start game?")
-
     	var W = this.game.config.width * 2;
     	var H = this.game.config.height;
+
+    	this.createParticle(500,0)
+    	this.createParticle(600,0)
 
     	this.matter.world.setBounds(0, 0, W, H);
 
     	var block = this.matter.add.image(400, 0, 'block').setBounce(0.8).setMass(60).setFriction(0.9);
 
-    	this.matter.add.image(0,0, 'stone');
     	this.matter.add.mouseSpring();
 
     	// Set up camera to follow player 
