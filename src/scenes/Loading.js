@@ -19,7 +19,8 @@ class Loading extends Phaser.Scene {
 
     preload() {
         let music = new Music();
-        music.playSampleNote();
+        music.playLoadingMusic();
+        this.music = music;
         
 
     	// We can still load assets in each scene, but I think it might be best to load the 
@@ -35,6 +36,7 @@ class Loading extends Phaser.Scene {
     	this.load.image('pixel-red', 'assets/particles/pixel-red.png');
     	this.load.image('snow', 'assets/particles/snow.png');
         this.load.image('stone-tile', 'assets/stone_tile.png');
+        this.load.image('face_normal', 'assets/face_normal.png');
     	// Levels
     	this.load.image('level1', 'assets/levels/level1.png');
 
@@ -46,12 +48,14 @@ class Loading extends Phaser.Scene {
 
     	this.load.on('complete', function () {
     		loadingText.text = "Click to start!";
+            
 	    });
     }
 
     create() {
     	var that = this;
     	this.input.once('pointerdown', function () {
+            that.music.notLoading();
             that.scene.start("Game");
         });
     }
