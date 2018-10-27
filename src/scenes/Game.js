@@ -127,7 +127,7 @@ class Game extends Phaser.Scene {
         			let dy = particle1.y - particle2.y; 
         			let dist  = Math.sqrt(dx * dx + dy * dy);
         			if(dist < 30) {
-        				let joint = this.matter.add.constraint(particle1, particle2, 35, 0.1);
+        				let joint = this.matter.add.constraint(particle1, particle2, 30, 0.9);
         				particle1.joints[id2] = joint;
         				particle2.joints[id1] = joint;
         			}

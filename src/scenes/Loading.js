@@ -19,7 +19,8 @@ class Loading extends Phaser.Scene {
 
     preload() {
         let music = new Music();
-        music.playSampleNote();
+        music.playLoadingMusic();
+        this.music = music;
         
 
     	// We can still load assets in each scene, but I think it might be best to load the 
@@ -45,12 +46,14 @@ class Loading extends Phaser.Scene {
 
     	this.load.on('complete', function () {
     		loadingText.text = "Click to start!";
+            
 	    });
     }
 
     create() {
     	var that = this;
     	this.input.once('pointerdown', function () {
+            that.music.notLoading();
             that.scene.start("Game");
         });
     }
