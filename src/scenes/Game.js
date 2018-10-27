@@ -67,15 +67,23 @@ class Game extends Phaser.Scene {
     	return p;
     }
 
+    markSentient(particle) {
+    	// This function should ONLY be run on a single particle on startup
+    	// or on a particle that is connected to a sentient chunk 
+    	particle.isSentient = true;
+    	this.sentientParticles.push(particle);
+    }
+
     create() {    	
     	this.particles = [];
-    	this.particleKeys = {}
+    	this.particleKeys = {};
+    	this.sentientParticles = [];
     	this.initKeys();
     	var W = this.game.config.width * 2;
     	var H = this.game.config.height;
 
-    	this.createParticle(500,0)
-    	this.createParticle(600,0)
+    	this.markSentient(this.createParticle(500,0, 1))
+    	this.createParticle(600,0, 1)
     	for(let i = 0;i < 10;i++){
     		let min = 0.5;
     		let max = 1;
@@ -96,7 +104,6 @@ class Game extends Phaser.Scene {
 
     	// Set up camera to follow player 
     	this.cameras.main.setBounds(0, 0, W, H);
-    	this.cameras.main.startFollow(block, true, 0.09, 0.09);
 
     	// Try to read image data to create level 
     	var tex = this.textures.get('level1');
@@ -111,16 +118,24 @@ class Game extends Phaser.Scene {
 			offset += 500;
 		}
 
+		console.log(this.cameras.main);
     }
 
     update() {
     	this.debugUpdate();	
 
 
-    	// Don't self join? 
+    	let sentientAvgX = 0;
+    	let sentientAvgY = 0;
         
         for(let i = 0; i < this.particles.length; i++) {
         	let particle1 = this.particles[i];
+
+        	if(particle1.isSentient) {
+        		sentientAvgX += particle1.x; 
+        		sentientAvgY += particle1.y;
+        	}
+
         	let id1 = particle1.uniqueID;
 
         	// Check if the distance between particle1 and all its joint particles is too big, 
@@ -162,6 +177,18 @@ class Game extends Phaser.Scene {
         		}
         	}
         }
+
+        // Average the x and y of the sentient 
+        var W = this.game.config.width;
+    	var H = this.game.config.height;
+        sentientAvgX /= this.sentientParticles.length;
+        sentientAvgY /= this.sentientParticles.length;
+        let camera = this.cameras.main;
+        let dx = (sentientAvgX - camera.scrollX) - camera.centerX;
+        let dy = (sentientAvgY - camera.scrollY) - camera.centerY;
+		let newX = (camera.centerX + camera.scrollX) + dx * 0.16;
+		let newY = (camera.centerY + camera.scrollY) + dy * 0.16;
+        camera.centerOn(newX, newY);
     }
 }
 
