@@ -45,15 +45,16 @@ class Game extends Phaser.Scene {
     	return this.matter.add.fromVertices(x, y, verts, { isStatic: true }, true);
     }
 
-    createParticle(x,y) {
-    	let p = this.matter.add.image(x,y, 'snow', null, 
-    		{shape: {
-    			type: 'polygon',
-    			radius: 20
-    		}})
+    createParticle(x,y, scale) {
+    	// let p = this.matter.add.image(x,y, 'snow', null, 
+    	// 	{shape: {
+    	// 		type: 'polygon',
+    	// 		radius: 20
+    	// 	}})
+    	let p = this.matter.add.image(x,y, 'snow')
 
-    	//p.setCircle(20);
-    	p.setScale(0.7);
+    	p.setCircle(12);
+    	p.setScale(scale);
     	p.setOrigin(0.5);
     	p.setFriction(0.97);
     	p.setBlendMode('ADD');
@@ -76,8 +77,15 @@ class Game extends Phaser.Scene {
     	this.createParticle(500,0)
     	this.createParticle(600,0)
     	for(let i = 0;i < 10;i++){
-    		this.createParticle(600 + i * 50,0)
+    		let min = 0.5;
+    		let max = 1;
+    		let size = Math.round(Math.random() * (min-max)) + min;
+    		this.createParticle(600 + i * 50,0, 1)
     	}
+
+    	// for(let i = 0;i < 50;i++){
+    	// 	this.createParticle(800 + Math.random() * 200, 0)
+    	// }
 
     	this.matter.world.setBounds(0, 0, W, H);
 
@@ -107,20 +115,40 @@ class Game extends Phaser.Scene {
 
     update() {
     	this.debugUpdate();	
-    	// Break joint based on distance
+
+
     	// Don't self join? 
         
         for(let i = 0; i < this.particles.length; i++) {
         	let particle1 = this.particles[i];
         	let id1 = particle1.uniqueID;
 
-        	// Check if the distance between 
+        	// Check if the distance between particle1 and all its joint particles is too big, 
+        	// and if so, destroy the joint
+        	for(let key in particle1.joints) {
+    			let joint = particle1.joints[key]
+    			let particle2 = this.particleKeys[key]
+    			let dx = particle1.x - particle2.x; 
+    			let dy = particle1.y - particle2.y; 
+    			let dist  = Math.sqrt(dx * dx + dy * dy);
+    			if (dist >= 50 || dist < 30) {
+    				delete particle2.joints[particle1.uniqueID];
+    				delete particle1.joints[key];
+    				this.matter.world.removeConstraint(joint);
+    			}
+    			
+    		}
 
         	for(let j = 0; j < this.particles.length; j++) {
         		let particle2 = this.particles[j];
-        		if(Object.keys(particle1.joints).length >= 3 || Object.keys(particle2.joints).length >= 3) {
-	        		continue;
-	        	}
+        		let p1Keys = Object.keys(particle1.joints);
+        		let p2Keys = Object.keys(particle2.joints);
+        		
+        		// No particle should have more than 3 connections
+        		// if(p1Keys.length >= 3 || p2Keys.length >= 3) {
+	        	// 	continue;
+	        	// }
+
         		let id2 = particle2.uniqueID;
         		if (i != j && !particle1.joints[id2]) {
         			let dx = particle1.x - particle2.x; 
