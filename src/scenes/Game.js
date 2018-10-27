@@ -4,6 +4,8 @@ import ImageTracer from '../ImageTracer';
 class Game extends Phaser.Scene {
     constructor(config) {
     	super('Game');
+
+    	this.pCounter = 0;
     }
 
     debugUpdate() {
@@ -30,10 +32,10 @@ class Game extends Phaser.Scene {
     }
 
     createParticle(x,y) {
-    	let p = this.matter.add.image(x,y, 'white', null, 
+    	let p = this.matter.add.image(x,y, 'snow', null, 
     		{shape: {
     			type: 'polygon',
-    			radius: 15
+    			radius: 20
     		}})
 
     	//p.setCircle(20);
@@ -41,16 +43,25 @@ class Game extends Phaser.Scene {
     	p.setOrigin(0.5);
     	p.setFriction(0.97);
     	p.setBlendMode('ADD');
+    	p.uniqueID = this.pCounter++;
+    	p.joints = {}
+
+    	this.particles.push(p);
+
     	return p;
     }
 
     create() {    	
+    	this.particles = [];
     	this.initKeys();
     	var W = this.game.config.width * 2;
     	var H = this.game.config.height;
 
     	this.createParticle(500,0)
     	this.createParticle(600,0)
+    	for(let i = 0;i < 10;i++){
+    		this.createParticle(600 + i * 50,0)
+    	}
 
     	this.matter.world.setBounds(0, 0, W, H);
 
@@ -79,7 +90,30 @@ class Game extends Phaser.Scene {
 
     update() {
     	this.debugUpdate();	
-        //console.log(this.block.x, this.block.y)
+    	// Break joint based on distance
+    	// Don't self join? 
+        
+        for(let i = 0; i < this.particles.length; i++) {
+        	let particle1 = this.particles[i];
+        	let id1 = particle1.uniqueID;
+        	for(let j = 0; j < this.particles.length; j++) {
+        		let particle2 = this.particles[j];
+        		if(Object.keys(particle1.joints).length >= 3 || Object.keys(particle2.joints).length >= 3) {
+	        		continue;
+	        	}
+        		let id2 = particle2.uniqueID;
+        		if (i != j && !particle1.joints[id2]) {
+        			let dx = particle1.x - particle2.x; 
+        			let dy = particle1.y - particle2.y; 
+        			let dist  = Math.sqrt(dx * dx + dy * dy);
+        			if(dist < 30) {
+        				let joint = this.matter.add.constraint(particle1, particle2, 35, 0.1);
+        				particle1.joints[id2] = joint;
+        				particle2.joints[id1] = joint;
+        			}
+        		}
+        	}
+        }
     }
 }
 
