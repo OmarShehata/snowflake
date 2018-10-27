@@ -124,7 +124,7 @@ class ImageTracer {
                 }
             }
         }
-        for (let i=0; i<4; i++) {relax();}
+        for (let i=0; i<2; i++) {relax();}
 
 		// Convert the x/y to a string for Matterjs 
 		let finalShapes = [];

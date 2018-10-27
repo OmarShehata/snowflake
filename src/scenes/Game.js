@@ -69,15 +69,18 @@ class Game extends Phaser.Scene {
 
     markSentient(particle) {
     	// This function should ONLY be run on a single particle on startup
-    	// or on a particle that is connected to a sentient chunk 
+    	// or on a particle that is connected to   a sentient chunk 
     	particle.isSentient = true;
     	this.sentientParticles.push(particle);
+    	particle.setTint(0xff0000);
     }
 
     create() {    	
     	this.particles = [];
     	this.particleKeys = {};
     	this.sentientParticles = [];
+    	this.targetCamX = 0;
+    	this.targetCamY = 0;
     	this.initKeys();
     	var W = this.game.config.width * 2;
     	var H = this.game.config.height;
@@ -118,7 +121,99 @@ class Game extends Phaser.Scene {
 			offset += 500;
 		}
 
-		console.log(this.cameras.main);
+    }
+
+    killDisconnectedSentience() {
+    	// Collect all connected components
+    	// if there are more than 1, mark all except the biggest as non-sentient 
+    	let that = this;
+    	function depthFirstSearch(particle, explored) {
+    		explored[particle.uniqueID] = true; 
+    		for(let key in particle.joints) {
+				let particle2 = that.particleKeys[key]
+				if(!explored[key]) {
+					depthFirstSearch(particle2, explored);
+				}
+			}
+    	}
+
+    	let componentArray = [];
+    	if(this.sentientParticles.length == 0) {
+    		return;
+    	}
+
+    	let component = {};
+    	depthFirstSearch(this.sentientParticles[0], component);
+    	componentArray.push(component);
+    	//console.log(Object.keys(component).length, this.sentientParticles.length);
+    	let done = false;
+    	while(!done) {
+    		for(let p of this.sentientParticles) {
+	    		if(!component[p.uniqueID]) {
+	    			// Found a new component!
+	    			let newComponent = {};
+	    			depthFirstSearch(p, newComponent);
+	    			componentArray.push(newComponent);
+	    			break;
+	    		}
+	    	}
+
+	    	done = true;
+    	}
+    	
+
+    	if(componentArray.length > 1) {
+    		// Find the biggest component 
+    		let biggestComponentIndex = -1;
+    		let biggest;
+    		let i = 0;
+    		for(let c of componentArray) {
+    			if(biggestComponentIndex == -1) {
+    				biggestComponentIndex = i;
+    				biggest = Object.keys(c).length;
+    			}
+
+    			if(Object.keys(c).length >= biggest) {
+    				biggest = Object.keys(c).length; 
+    				biggestComponentIndex = i;
+    			}
+
+    			i++;
+    		}
+
+    		// Now mark everything else as non sentient 
+    		i = 0;
+    		this.sentientParticles = [];
+
+    		for(let c of componentArray) {
+    			for(let key in c) {
+    				let particle = this.particleKeys[key]
+					if(i != biggestComponentIndex) {
+	    				particle.isSentient = false;
+						particle.setTint(0xffffff);
+	    			} else {
+	    				this.sentientParticles.push(particle);
+	    			}
+				}
+    			i++;
+    		}
+
+    		
+    	}
+
+    	
+    }
+
+    markSweepSentience(particle, explored) {
+    	// Given a particle, make sure all particles connected to it are marked as sentient 
+    	for(let key in particle.joints) {
+			let particle2 = this.particleKeys[key]
+			if(!explored[key] && !particle2.isSentient) {
+				this.markSentient(particle2);
+				explored[key] = true;
+				this.markSweepSentience(particle2, explored);
+			}
+		}
     }
 
     update() {
@@ -150,6 +245,7 @@ class Game extends Phaser.Scene {
     				delete particle2.joints[particle1.uniqueID];
     				delete particle1.joints[key];
     				this.matter.world.removeConstraint(joint);
+    				this.killDisconnectedSentience();
     			}
     			
     		}
@@ -173,6 +269,13 @@ class Game extends Phaser.Scene {
         				let joint = this.matter.add.constraint(particle1, particle2, 35, 0.35);
         				particle1.joints[id2] = joint;
         				particle2.joints[id1] = joint;
+        				if(particle1.isSentient && !particle2.isSentient) {
+        					this.markSentient(particle2);
+        					this.markSweepSentience(particle2, {});
+        				} else if (particle2.isSentient && !particle1.isSentient) {
+        					this.markSentient(particle1);
+        					this.markSweepSentience(particle1, {});
+        				}
         			}
         		}
         	}
@@ -184,8 +287,12 @@ class Game extends Phaser.Scene {
         sentientAvgX /= this.sentientParticles.length;
         sentientAvgY /= this.sentientParticles.length;
         let camera = this.cameras.main;
-        let dx = (sentientAvgX - camera.scrollX) - camera.centerX;
-        let dy = (sentientAvgY - camera.scrollY) - camera.centerY;
+
+        this.targetCamX += (sentientAvgX - this.targetCamX) * 0.16;
+        this.targetCamY += (sentientAvgY - this.targetCamY) * 0.16;
+
+        let dx = (this.targetCamX - camera.scrollX) - camera.centerX;
+        let dy = (this.targetCamY - camera.scrollY) - camera.centerY;
 		let newX = (camera.centerX + camera.scrollX) + dx * 0.16;
 		let newY = (camera.centerY + camera.scrollY) + dy * 0.16;
         camera.centerOn(newX, newY);
