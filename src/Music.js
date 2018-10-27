@@ -2,14 +2,9 @@ import Tone from 'tone';
 import teoria from 'teoria';
 
 class Music {
-	constructor(options){
-		console.log(options);
-		this.CONSTANT_VALUE = 2;
-	}
 
-	playSampleNote() {
-		console.log(teoria)
-		let synth = new Tone.FMSynth({
+	constructor(options){
+					this.synth = new Tone.FMSynth({
 		    envelope  : {
 		        attack  : 0.01 ,
 		        decay  : 0.01 ,
@@ -17,8 +12,14 @@ class Music {
 		        release  : 0.7
 		    }
 		}).toMaster()
+		console.log(options);
+		this.CONSTANT_VALUE = 2;
+	}
 
-        synth.triggerAttackRelease('C4', '8n')
+	playSampleNote() {
+		console.log(this.CONSTANT_VALUE)
+
+        this.synth.triggerAttackRelease('C4', '8n')
 	}
 }
 
