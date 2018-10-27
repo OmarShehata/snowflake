@@ -27,7 +27,7 @@ class ImageTracer {
 		return smallestIndex;
 	}
 
-	traceImage(img) {
+	traceImage(img, size) {
 		var c = document.createElement("canvas")
 		c.width = img.width
 		c.height = img.height
@@ -45,7 +45,7 @@ class ImageTracer {
 				// If we see a black pixel and we're not inside anything
 				if(pixel.r == 0 && !inside) {
 					inside = true;
-					points.push({x:x * 10,y:y * 10})
+					points.push({x:x * size, y:y * size})
 				} else if(inside && pixel.r == 255) {
 					inside = false;
 				}
@@ -125,9 +125,11 @@ class ImageTracer {
             }
         }
         for (let i=0; i<2; i++) {relax();}
+        
+        return shapes;
 
 		// Convert the x/y to a string for Matterjs 
-		let finalShapes = [];
+		/*let finalShapes = [];
 
 		for(let shape of shapes){
 			let newString = '';
@@ -137,7 +139,7 @@ class ImageTracer {
 			finalShapes.push(newString)
 		}		
 
-		return finalShapes;
+		return finalShapes;*/
 
 	}
 }

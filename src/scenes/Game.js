@@ -40,11 +40,6 @@ class Game extends Phaser.Scene {
     	
     }
 
-    makeShape(pathString, x, y) {
-    	let verts = this.matter.verts.fromPath(pathString);
-    	return this.matter.add.fromVertices(x, y, verts, { isStatic: true }, true);
-    }
-
     createParticle(x,y, scale) {
     	// let p = this.matter.add.image(x,y, 'snow', null, 
     	// 	{shape: {
@@ -82,8 +77,13 @@ class Game extends Phaser.Scene {
     	this.targetCamX = 0;
     	this.targetCamY = 0;
     	this.initKeys();
-    	var W = this.game.config.width * 2;
-    	var H = this.game.config.height;
+        var tex = this.textures.get('level1');
+    	var img = tex.getSourceImage();
+        var map_scale = 10;
+        var map_w = img.width * map_scale;
+        var map_h = img.height * map_scale;
+    	var W = map_w;
+    	var H = map_h;
 
     	this.markSentient(this.createParticle(500,0, 1))
     	this.createParticle(600,0, 1)
@@ -108,18 +108,44 @@ class Game extends Phaser.Scene {
     	// Set up camera to follow player 
     	this.cameras.main.setBounds(0, 0, W, H);
 
-    	// Try to read image data to create level 
-    	var tex = this.textures.get('level1');
-    	var img = tex.getSourceImage();
-    	
+    	// Try to read image data to create level
 		let tracer = new ImageTracer();
-		let shapes = tracer.traceImage(img);
+		let shapes = tracer.traceImage(img, map_scale);
+        
+        // Convert shape vertex x/y to a string for Matterjs 
+		let stringShapes = [];
 
-		let offset = 0;
-		for(let shape of shapes) {
-			this.makeShape(shape, 1280/2 + offset, H/2);
-			offset += 500;
+		for(let shape of shapes){
+			let newString = '';
+			for(let point of shape){
+				newString += point.x + " " + point.y + " "
+			}
+			stringShapes.push(newString)
 		}
+        
+        var vertArray = [];
+        for(let s of stringShapes) {
+            let verts = this.matter.verts.fromPath(s);
+            vertArray.push(verts);
+        }
+    	this.matter.add.fromVertices(W/2, H/2, vertArray, { isStatic: true }, true);
+        
+        // Tile stone texture across level, masking using the traced image (help from https://goo.gl/VC8dK2)
+        var ground = this.add.tileSprite(W/2, H/2, W, H, 'stone-tile');
+        
+        var mask_shape = this.make.graphics();
+        mask_shape.fillStyle(0xffffff);
+        mask_shape.beginPath();
+        for(let shape of shapes) {
+            var pts = [];
+            for (let p of shape) {
+                pts.push(new Phaser.Geom.Point(p.x, p.y));
+            }
+            mask_shape.fillPoints(pts, true);
+        }
+        var mask = mask_shape.createGeometryMask();
+
+        ground.setMask(mask);
 
     }
 
