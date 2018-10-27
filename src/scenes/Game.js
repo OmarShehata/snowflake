@@ -72,7 +72,7 @@ class Game extends Phaser.Scene {
     	// or on a particle that is connected to   a sentient chunk 
     	particle.isSentient = true;
     	this.sentientParticles.push(particle);
-    	particle.setTint(0xff0000);
+    	//particle.setTint(0xff0000);
     }
 
     create() {    	
@@ -120,6 +120,10 @@ class Game extends Phaser.Scene {
 			this.makeShape(shape, 1280/2 + offset, H/2);
 			offset += 500;
 		}
+
+		this.face = this.add.image(0,0, 'face_normal');
+		this.face.setOrigin(0.5);
+		this.face.setScale(0.1);
 
     }
 
@@ -190,7 +194,7 @@ class Game extends Phaser.Scene {
     				let particle = this.particleKeys[key]
 					if(i != biggestComponentIndex) {
 	    				particle.isSentient = false;
-						particle.setTint(0xffffff);
+						//particle.setTint(0xffffff);
 	    			} else {
 	    				this.sentientParticles.push(particle);
 	    			}
@@ -296,6 +300,11 @@ class Game extends Phaser.Scene {
 		let newX = (camera.centerX + camera.scrollX) + dx * 0.16;
 		let newY = (camera.centerY + camera.scrollY) + dy * 0.16;
         camera.centerOn(newX, newY);
+
+        this.face.x = sentientAvgX; 
+        this.face.y = sentientAvgY;
+        let factor = Math.min(this.sentientParticles.length, 10) / 10;
+        this.face.setScale(0.1 + factor * 0.5)
     }
 }
 
