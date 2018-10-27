@@ -108,6 +108,23 @@ class ImageTracer {
 				newShape = [];
 			}
 		}
+        
+        // Relax neighboring points to smooth the shapes
+        function lerp(a, b, t) {
+            return a*(1-t)+b*t;
+        }
+        function relax() {
+            for(let shape of shapes) {
+                let pts = shape.length;
+                for(let i=0; i<pts; i++) {
+                    let prev = (i-1+pts) % pts;
+                    let next = (i+1) % pts;
+                    shape[i].x = lerp(shape[prev].x, shape[next].x, .5);
+                    shape[i].y = lerp(shape[prev].y, shape[next].y, .5);
+                }
+            }
+        }
+        for (let i=0; i<2; i++) {relax();}
 
 		// Convert the x/y to a string for Matterjs 
 		let finalShapes = [];
