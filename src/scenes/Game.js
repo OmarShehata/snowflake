@@ -56,7 +56,7 @@ class Game extends Phaser.Scene {
     	p.setCircle(12);
     	p.setScale(scale);
     	p.setOrigin(0.5);
-    	p.setFriction(0.97);
+    	p.setFriction(0.99);
     	p.setBlendMode('ADD');
     	p.uniqueID = this.pCounter++;
     	p.joints = {}
@@ -131,7 +131,7 @@ class Game extends Phaser.Scene {
     			let dx = particle1.x - particle2.x; 
     			let dy = particle1.y - particle2.y; 
     			let dist  = Math.sqrt(dx * dx + dy * dy);
-    			if (dist >= 50 || dist < 30) {
+    			if (dist >= 45 || dist <= 30) {
     				delete particle2.joints[particle1.uniqueID];
     				delete particle1.joints[key];
     				this.matter.world.removeConstraint(joint);
@@ -155,7 +155,7 @@ class Game extends Phaser.Scene {
         			let dy = particle1.y - particle2.y; 
         			let dist  = Math.sqrt(dx * dx + dy * dy);
         			if(dist < 30) {
-        				let joint = this.matter.add.constraint(particle1, particle2, 35, 0.1);
+        				let joint = this.matter.add.constraint(particle1, particle2, 35, 0.35);
         				particle1.joints[id2] = joint;
         				particle2.joints[id1] = joint;
         			}
