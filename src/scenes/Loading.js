@@ -1,5 +1,5 @@
 import 'phaser';
-
+import Music from '../Music';
 
 class Loading extends Phaser.Scene {
     constructor(config) {
@@ -18,6 +18,10 @@ class Loading extends Phaser.Scene {
     }
 
     preload() {
+        let music = new Music();
+        music.playSampleNote();
+        
+
     	// We can still load assets in each scene, but I think it might be best to load the 
     	// heavy stuff here up front 
     	this.load.image('logo', 'assets/logo.png');

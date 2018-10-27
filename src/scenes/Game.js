@@ -55,6 +55,7 @@ class Game extends Phaser.Scene {
     	this.matter.world.setBounds(0, 0, W, H);
 
     	var block = this.matter.add.image(400, 0, 'block').setBounce(0.8).setMass(60).setFriction(0.9);
+        this.block = block;
 
     	this.matter.add.mouseSpring();
 
@@ -78,6 +79,7 @@ class Game extends Phaser.Scene {
 
     update() {
     	this.debugUpdate();	
+        //console.log(this.block.x, this.block.y)
     }
 }
 
