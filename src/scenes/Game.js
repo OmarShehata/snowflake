@@ -14,11 +14,25 @@ class Game extends Phaser.Scene {
     		this.matter.world.drawDebug = !this.matter.world.drawDebug;
     		this.matter.world.debugGraphic.clear();
     	}
+    	// Break all joints 
+    	if (Phaser.Input.Keyboard.JustDown(this.keys.B)) {
+    		for(let i = 0; i < this.particles.length; i++) {
+        		let particle1 = this.particles[i];
+        		for(let key in particle1.joints) {
+        			let joint = particle1.joints[key]
+        			let particle2 = this.particleKeys[key]
+        			delete particle2.joints[particle1.uniqueID];
+        			delete particle1.joints[key];
+        			this.matter.world.removeConstraint(joint);
+        		}
+        	}
+    	}
     }
 
     initKeys() {
     	this.keys  = {
-    		'spacebar' : this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+    		'spacebar' : this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+    		'B' : this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.B)
     	}
 	}
 
@@ -47,12 +61,14 @@ class Game extends Phaser.Scene {
     	p.joints = {}
 
     	this.particles.push(p);
+    	this.particleKeys[p.uniqueID] = p;
 
     	return p;
     }
 
     create() {    	
     	this.particles = [];
+    	this.particleKeys = {}
     	this.initKeys();
     	var W = this.game.config.width * 2;
     	var H = this.game.config.height;
@@ -86,6 +102,7 @@ class Game extends Phaser.Scene {
 			this.makeShape(shape, 1280/2 + offset, H/2);
 			offset += 500;
 		}
+
     }
 
     update() {
@@ -96,6 +113,9 @@ class Game extends Phaser.Scene {
         for(let i = 0; i < this.particles.length; i++) {
         	let particle1 = this.particles[i];
         	let id1 = particle1.uniqueID;
+
+        	// Check if the distance between 
+
         	for(let j = 0; j < this.particles.length; j++) {
         		let particle2 = this.particles[j];
         		if(Object.keys(particle1.joints).length >= 3 || Object.keys(particle2.joints).length >= 3) {
