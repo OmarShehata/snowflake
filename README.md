@@ -18,15 +18,16 @@ Run next commands in your terminal:
 
 ## Todo
 
-* Move around with arrow keys/WASD 
-* Move camera 
-* Experiment with snow forming
-	* Create distance joints when close enough, break when too much force?
-	* Try the attractors plugin and have them all constantly try to attract to core?
-	* Apply torque instead of force to move? 
-	* Does snow constantly fall from the sky? 
-* Enemies?
-* Levels?
-* A boss????
+* Create matterjs softbody as seen [here](https://github.com/liabru/matter-js/blob/master/src/factory/Composites.js#L298).
+	* It's really just a mesh of constraints.
+* Move by finding topmost particle(s) and applying force to them
+* Any particle you touch, create constraints to it 
+* Break constraints with enough force? 
+* Path graphics for the snow so they can plop together 
 
-* Should the snow grow the terrain?
+
+## Mechanic Ideas
+
+* Generate random soft bodies, and if they don't stick, it's just debris, but if they stick, it'd be weird wobbling snowmen 
+* Avalanche level makes you so heavy and deformed 
+* The particles are all of different sizes making the soft body interesting
