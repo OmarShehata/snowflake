@@ -22,14 +22,20 @@ class Loading extends Phaser.Scene {
     	// heavy stuff here up front 
     	this.load.image('logo', 'assets/logo.png');
     	this.load.image('block', 'assets/block.png');
+    	this.load.image('stone', 'assets/stone.png');
     	this.load.image('blue', 'assets/particles/blue.png');
     	this.load.image('white', 'assets/particles/white.png');
     	this.load.image('yellow', 'assets/particles/yellow.png');
+    	this.load.image('pixel', 'assets/particles/pixel.png');
+    	this.load.image('pixel-blue', 'assets/particles/pixel-blue.png');
+    	this.load.image('pixel-red', 'assets/particles/pixel-red.png');
+    	// Levels
+    	this.load.image('level1', 'assets/levels/level1.png');
 
     	var loadingText = this.createText();
 
     	this.load.on('progress', function (value) {
-    		loadingText.text = value.toFixed(2) * 100 + " %";
+    		loadingText.text = Math.round(value.toFixed(2) * 100) + " %";
     	});
 
     	this.load.on('complete', function () {

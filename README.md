@@ -28,3 +28,5 @@ Run next commands in your terminal:
 * Enemies?
 * Levels?
 * A boss????
+
+* Should the snow grow the terrain?
