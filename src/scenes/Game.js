@@ -41,15 +41,15 @@ class Game extends Phaser.Scene {
     }
 
     createParticle(x,y, scale) {
-    	// let p = this.matter.add.image(x,y, 'snow', null, 
-    	// 	{shape: {
-    	// 		type: 'polygon',
-    	// 		radius: 15,
-    	// 		sides: 6
-    	// 	}})
-    	let p = this.matter.add.image(x,y, 'snow')
+    	let p = this.matter.add.image(x,y, 'snow', null, 
+    		{shape: {
+    			type: 'polygon',
+    			radius: 15,
+    			sides: 6
+    		}})
+    	//let p = this.matter.add.image(x,y, 'snow')
 
-    	p.setCircle(12);
+    	//p.setCircle(12);
     	p.setScale(scale);
     	p.setOrigin(0.5);
     	p.setFriction(0.99);
@@ -101,14 +101,14 @@ class Game extends Phaser.Scene {
         var back_mtn3 = this.add.tileSprite(game_w, game_h/2+150, W, mtn3_tex.getSourceImage().height, 'mtn3').setScrollFactor(.06);
         back_mtn3.setTilePosition(120, 0);
         
-    	this.markSentient(this.createParticle(300,400, 1))
+    	this.markSentient(this.createParticle(300,600, 1))
     	this.createParticle(400,400, 1)
 
     	for(let i = 0;i < 10;i++){
     		let min = 0.5;
     		let max = 1;
     		let size = Math.round(Math.random() * (min-max)) + min;
-    		this.createParticle(600 + i * 50,400, 1)
+    		this.createParticle(600 + i * 50,600, 1)
     	}
 
     	// for(let i = 0;i < 50;i++){
@@ -117,7 +117,7 @@ class Game extends Phaser.Scene {
 
     	this.matter.world.setBounds(0, 0, W, H);
 
-    	//this.matter.add.mouseSpring();
+    	this.matter.add.mouseSpring();
 
     	// Set up camera to follow player 
     	this.cameras.main.setBounds(0, 0, W, H);
@@ -145,21 +145,21 @@ class Game extends Phaser.Scene {
     	let collision = this.matter.add.fromVertices(W/2 - 450, H/2 + 30, vertArray, { isStatic: true }, true);
 
         // Tile stone texture across level, masking using the traced image (help from https://goo.gl/VC8dK2)
-        var ground = this.add.tileSprite(W/2, H/2, W, H, 'stone-tile');
+        // var ground = this.add.tileSprite(W/2, H/2, W, H, 'stone-tile');
         
-        var mask_shape = this.make.graphics();
-        mask_shape.fillStyle(0xffffff);
-        mask_shape.beginPath();
-        for(let shape of shapes) {
-            var pts = [];
-            for (let p of shape) {
-                pts.push(new Phaser.Geom.Point(p.x, p.y));
-            }
-            mask_shape.fillPoints(pts, true);
-        }
-        var mask = mask_shape.createGeometryMask();
+        // var mask_shape = this.make.graphics();
+        // mask_shape.fillStyle(0xffffff);
+        // mask_shape.beginPath();
+        // for(let shape of shapes) {
+        //     var pts = [];
+        //     for (let p of shape) {
+        //         pts.push(new Phaser.Geom.Point(p.x, p.y));
+        //     }
+        //     mask_shape.fillPoints(pts, true);
+        // }
+        // var mask = mask_shape.createGeometryMask();
 
-        ground.setMask(mask);        
+        // ground.setMask(mask);        
         
         // Init character face
 		this.face = this.add.image(0,0, 'face_normal');
@@ -198,47 +198,36 @@ class Game extends Phaser.Scene {
 		} else {
 			char.counter = 0;
 		}
+    		
+		// If click, apply force to all particles nearby 
+		if (this.input.mousePointer.isDown) {
+			let dx = this.input.mousePointer.x - playerX; 
+			let dy = this.input.mousePointer.y - playerY; 
+			let angle = Math.atan2(dy,dx);
+			let cos = Math.cos(angle);
+			let sin = Math.sin(angle);
+			let dist = Math.sqrt(dx * dx + dy * dy);
+			let strengthFactor = (dist / 400);
+			if(strengthFactor > 1) strengthFactor = 1; 
 
-		if(this.windChar.targetX) {
-			let X = this.windChar.targetX;
-			let Y = this.windChar.targetY;
-    		// Get angle to player, send to dist away from that angle
-    		let dx = this.input.mousePointer.x - X; 
-    		let dy = this.input.mousePointer.y - Y; 
-    		let angle = Math.atan2(dy,dx) - Math.PI;
-    		let offset = 100 + 5 * this.sentientParticles.length;
-    		let targetX = X + Math.cos(angle) * offset; 
-    		let targetY = Y + Math.sin(angle) * offset; 
-    		char.x += (targetX - char.x) * 0.05;
-    		char.y += (targetY - char.y) * 0.05;
+			let maxParticles = 30;
 
-    		let cos = Math.cos(angle + Math.PI);
-    		let sin = Math.sin(angle + Math.PI);
-    		// If click, apply force to all particles nearby 
-    		if (this.input.mousePointer.isDown) {
-    			for(let particle of this.sentientParticles) {
-    				let dx = particle.x - char.x; 
-    				let dy = particle.y - char.y; 
-    				let dist = Math.sqrt(dx * dx + dy * dy);
-    				let strengthFactor = (dist / 400);
-    				if(strengthFactor > 1) strengthFactor = 1; 
-    				strengthFactor = Math.sqrt(1 - strengthFactor, 4);
-    				let maxParticles = 30;
-    				let factor = 1.0 - (Math.min(this.sentientParticles.length, maxParticles) / maxParticles);
+			strengthFactor *= 0.005;
+			console.log(cos, sin, strengthFactor)
 
-    				Matter.Body.setVelocity(particle.body, {
-    					x: strengthFactor * 10 * cos * factor,
-    					y: strengthFactor * 10 * sin * factor
-    				})
+			for(let particle of this.sentientParticles) {
+				
+				// Matter.Body.setVelocity(particle.body, {
+				// 	x: strengthFactor * 20 * cos * factor,
+				// 	y: strengthFactor * 20 * sin * factor
+				// })
 
-    				// Matter.Body.applyForce(particle.body, 
-    				// 	{x:char.x, y:char.y}, {
-    				// 	x:cos * strengthFactor, y: sin * strengthFactor * yMultiplier
-    				// })
-    			}
-    		}
-
-    	}
+				Matter.Body.applyForce(particle.body, 
+					{x:this.input.mousePointer.x, y:this.input.mousePointer.y}, {
+					x:cos * strengthFactor, y: sin * strengthFactor
+				})
+			}
+	}
 
     	
     }
