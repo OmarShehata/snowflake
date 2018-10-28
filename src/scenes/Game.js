@@ -149,6 +149,12 @@ class Game extends Phaser.Scene {
         var game_w = this.game.config.width;
     	var game_h = this.game.config.height;
 
+    	// Toggle debug draw off to start with 
+    	// Just setting it to false in the initial settings doesn't work
+    	// because then matter doesn't initialize the debugGraphic
+    	this.matter.world.drawDebug = !this.matter.world.drawDebug;
+    	this.matter.world.debugGraphic.clear();
+
         // Init background graphics
         var back_sky = this.add.graphics();
         var top_color = 0x8fe3e2;
@@ -213,6 +219,9 @@ class Game extends Phaser.Scene {
     			// If determined to be on the ground, go and follow player 
     			this.windChar.targetX = playerX;
 				this.windChar.targetY = playerY;
+				if(this.face.state == "scared") {
+					this.updateFace(this, this.face, 'normal')
+				}
     		}
     		
 		} else {
@@ -221,8 +230,8 @@ class Game extends Phaser.Scene {
     		
 		// If click, apply force to all particles nearby 
 		if (this.input.mousePointer.isDown) {
-			let dx = this.input.mousePointer.x - playerX; 
-			let dy = this.input.mousePointer.y - playerY; 
+			let dx = this.input.mousePointer.worldX - playerX; 
+			let dy = this.input.mousePointer.worldY - playerY; 
 			let angle = Math.atan2(dy,dx);
 			let cos = Math.cos(angle);
 			let sin = Math.sin(angle);
@@ -233,7 +242,20 @@ class Game extends Phaser.Scene {
 			let maxParticles = 30;
 
 			strengthFactor *= 0.005;
-			console.log(cos, sin, strengthFactor)
+
+			let forcePosition = {
+				x: this.input.mousePointer.worldX,
+				y: this.input.mousePointer.worldY
+			};
+			let forceStrength = {
+				x: cos * strengthFactor, 
+				y: sin * strengthFactor
+			}
+
+			if(this.face.state == 'normal') {
+				//this.updateFace(this, this.face, 'scared');
+			}
+			
 
 			for(let particle of this.sentientParticles) {
 				
@@ -242,10 +264,7 @@ class Game extends Phaser.Scene {
 				// 	y: strengthFactor * 20 * sin * factor
 				// })
 
-				Matter.Body.applyForce(particle.body, 
-					{x:this.input.mousePointer.x, y:this.input.mousePointer.y}, {
-					x:cos * strengthFactor, y: sin * strengthFactor
-				})
+				Matter.Body.applyForce(particle.body, forcePosition, forceStrength);
 			}
 	   }
     }
@@ -350,6 +369,7 @@ class Game extends Phaser.Scene {
     	let sentientAvgX = 0;
     	let sentientAvgY = 0;
     	let sentientLength = 0;
+    	let broke_apart_times = 0;
         
         for(let i = 0; i < this.particles.length; i++) {
         	let particle1 = this.particles[i];
@@ -364,7 +384,7 @@ class Game extends Phaser.Scene {
 
         	// Check if the distance between particle1 and all its joint particles is too big, 
         	// and if so, destroy the joint
-            let broke_apart_times = 0;
+           
         	for(let key in particle1.joints) {
     			let joint = particle1.joints[key]
     			let particle2 = this.particleKeys[key]
@@ -379,6 +399,7 @@ class Game extends Phaser.Scene {
                     broke_apart_times++;
     			}
             }
+
             if (broke_apart_times > 2) {this.updateFace(this, this.face, 'hurt');}
 
         	for(let j = 0; j < this.particles.length; j++) {
