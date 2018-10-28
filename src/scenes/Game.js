@@ -41,14 +41,15 @@ class Game extends Phaser.Scene {
     }
 
     createParticle(x,y, scale) {
-    	// let p = this.matter.add.image(x,y, 'snow', null, 
-    	// 	{shape: {
-    	// 		type: 'polygon',
-    	// 		radius: 20
-    	// 	}})
-    	let p = this.matter.add.image(x,y, 'snow')
+    	let p = this.matter.add.image(x,y, 'snow', null, 
+    		{shape: {
+    			type: 'polygon',
+    			radius: 15,
+    			sides: 6
+    		}})
+    	// let p = this.matter.add.image(x,y, 'snow')
 
-    	p.setCircle(12);
+    	// p.setCircle(12);
     	p.setScale(scale);
     	p.setOrigin(0.5);
     	p.setFriction(0.99);
@@ -252,6 +253,7 @@ class Game extends Phaser.Scene {
 
     	let sentientAvgX = 0;
     	let sentientAvgY = 0;
+    	let sentientLength = 0;
         
         for(let i = 0; i < this.particles.length; i++) {
         	let particle1 = this.particles[i];
@@ -259,6 +261,7 @@ class Game extends Phaser.Scene {
         	if(particle1.isSentient) {
         		sentientAvgX += particle1.x; 
         		sentientAvgY += particle1.y;
+        		sentientLength++;
         	}
 
         	let id1 = particle1.uniqueID;
@@ -271,7 +274,7 @@ class Game extends Phaser.Scene {
     			let dx = particle1.x - particle2.x; 
     			let dy = particle1.y - particle2.y; 
     			let dist  = Math.sqrt(dx * dx + dy * dy);
-    			if (dist >= 45 || dist <= 30) {
+    			if (dist >= 45) {
     				delete particle2.joints[particle1.uniqueID];
     				delete particle1.joints[key];
     				this.matter.world.removeConstraint(joint);
@@ -314,8 +317,8 @@ class Game extends Phaser.Scene {
         // Average the x and y of the sentient 
         var W = this.game.config.width;
     	var H = this.game.config.height;
-        sentientAvgX /= this.sentientParticles.length;
-        sentientAvgY /= this.sentientParticles.length;
+        sentientAvgX /= sentientLength;
+        sentientAvgY /= sentientLength;
         let camera = this.cameras.main;
 
         this.targetCamX += (sentientAvgX - this.targetCamX) * 0.16;
@@ -329,8 +332,8 @@ class Game extends Phaser.Scene {
 
         this.face.x = sentientAvgX; 
         this.face.y = sentientAvgY;
-        let factor = Math.min(this.sentientParticles.length, 10) / 10;
-        this.face.setScale(0.1 + factor * 0.5)
+        let factor = Math.min(sentientLength, 10) / 10;
+        this.face.setScale(0.1 + factor * 0.2)
     }
 }
 

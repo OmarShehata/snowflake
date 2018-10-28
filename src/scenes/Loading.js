@@ -39,6 +39,7 @@ class Loading extends Phaser.Scene {
         this.load.image('face_normal', 'assets/face_normal.png');
     	// Levels
     	this.load.image('level1', 'assets/levels/level1.png');
+    	this.load.image('level3', 'assets/levels/level3.png');
 
     	var loadingText = this.createText();
 
