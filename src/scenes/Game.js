@@ -52,7 +52,8 @@ class Game extends Phaser.Scene {
     	p.setCircle(12);
     	p.setScale(scale);
     	p.setOrigin(0.5);
-    	p.setFriction(0.99);
+    	p.setFriction(0.8);
+        p.setFrictionAir(0.15);
     	p.setBlendMode('ADD');
     	p.uniqueID = this.pCounter++;
     	p.joints = {}
@@ -226,15 +227,15 @@ class Game extends Phaser.Scene {
     				let maxParticles = 30;
     				let factor = 1.0 - (Math.min(this.sentientParticles.length, maxParticles) / maxParticles);
 
-    				Matter.Body.setVelocity(particle.body, {
-    					x: strengthFactor * 10 * cos * factor,
-    					y: strengthFactor * 10 * sin * factor
-    				})
+    				/*Matter.Body.setVelocity(particle.body, {
+    					x: strengthFactor * 20 * cos * factor,
+    					y: strengthFactor * 20 * sin * factor
+    				})*/
 
-    				// Matter.Body.applyForce(particle.body, 
-    				// 	{x:char.x, y:char.y}, {
-    				// 	x:cos * strengthFactor, y: sin * strengthFactor * yMultiplier
-    				// })
+    				 Matter.Body.applyForce(particle.body, 
+    				 	{x:char.x, y:char.y}, {
+    				 	x:cos * strengthFactor / 160, y: sin * strengthFactor / 160
+    				 })
     			}
     		}
 
