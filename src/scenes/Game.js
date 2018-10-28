@@ -41,15 +41,15 @@ class Game extends Phaser.Scene {
     }
 
     createParticle(x,y, scale) {
-    	let p = this.matter.add.image(x,y, 'snow', null, 
-    		{shape: {
-    			type: 'polygon',
-    			radius: 15,
-    			sides: 6
-    		}})
-    	// let p = this.matter.add.image(x,y, 'snow')
+    	// let p = this.matter.add.image(x,y, 'snow', null, 
+    	// 	{shape: {
+    	// 		type: 'polygon',
+    	// 		radius: 15,
+    	// 		sides: 6
+    	// 	}})
+    	let p = this.matter.add.image(x,y, 'snow')
 
-    	// p.setCircle(12);
+    	p.setCircle(12);
     	p.setScale(scale);
     	p.setOrigin(0.5);
     	p.setFriction(0.99);
@@ -86,13 +86,13 @@ class Game extends Phaser.Scene {
     	var W = map_w;
     	var H = map_h;
 
-    	this.markSentient(this.createParticle(500,0, 1))
-    	this.createParticle(600,0, 1)
+    	this.markSentient(this.createParticle(300,400, 1))
+    	this.createParticle(400,400, 1)
     	for(let i = 0;i < 10;i++){
     		let min = 0.5;
     		let max = 1;
     		let size = Math.round(Math.random() * (min-max)) + min;
-    		this.createParticle(600 + i * 50,0, 1)
+    		this.createParticle(600 + i * 50,400, 1)
     	}
 
     	// for(let i = 0;i < 50;i++){
@@ -101,10 +101,7 @@ class Game extends Phaser.Scene {
 
     	this.matter.world.setBounds(0, 0, W, H);
 
-    	var block = this.matter.add.image(400, 0, 'block').setBounce(0.8).setMass(60).setFriction(0.9);
-        this.block = block;
-
-    	this.matter.add.mouseSpring();
+    	//this.matter.add.mouseSpring();
 
     	// Set up camera to follow player 
     	this.cameras.main.setBounds(0, 0, W, H);
@@ -129,8 +126,8 @@ class Game extends Phaser.Scene {
             let verts = this.matter.verts.fromPath(s);
             vertArray.push(verts);
         }
-    	this.matter.add.fromVertices(W/2, H/2, vertArray, { isStatic: true }, true);
-        
+    	let collision = this.matter.add.fromVertices(W/2 + 215, H/2 - 25, vertArray, { isStatic: true }, true);
+
         // Tile stone texture across level, masking using the traced image (help from https://goo.gl/VC8dK2)
         var ground = this.add.tileSprite(W/2, H/2, W, H, 'stone-tile');
         
@@ -152,6 +149,81 @@ class Game extends Phaser.Scene {
 		this.face.setOrigin(0.5);
 		this.face.setScale(0.1);
 
+
+		this.windChar = this.add.image(300,200, 'stone');
+		this.windChar.setOrigin(0.5)
+		this.windChar.setScale(0.5);
+		this.windChar.counter = 0;
+    }
+
+    windCharacterUpdate(playerX, playerY) {
+    	let Matter = Phaser.Physics.Matter.Matter;
+    	// Get the player's velocity. 
+    	let averageVelocity = {x:0, y:0};
+    	for(let particle of this.sentientParticles) {
+    		averageVelocity.x += particle.body.velocity.x;
+    		averageVelocity.y += particle.body.velocity.y;
+    	}
+    	averageVelocity.x /= this.sentientParticles.length; 
+    	averageVelocity.y /= this.sentientParticles.length; 
+    	let length = Math.sqrt(averageVelocity.x * averageVelocity.x + averageVelocity.y * averageVelocity.y);
+
+    	let char = this.windChar;
+
+    	if(length < 2 && !this.input.mousePointer.isDown) {
+    		char.counter ++; 
+    		if(char.counter > 20) {
+    			// If determined to be on the ground, go and follow player 
+    			this.windChar.targetX = playerX;
+				this.windChar.targetY = playerY;
+    		}
+    		
+		} else {
+			char.counter = 0;
+		}
+
+		if(this.windChar.targetX) {
+			let X = this.windChar.targetX;
+			let Y = this.windChar.targetY;
+    		// Get angle to player, send to dist away from that angle
+    		let dx = this.input.mousePointer.x - X; 
+    		let dy = this.input.mousePointer.y - Y; 
+    		let angle = Math.atan2(dy,dx) - Math.PI;
+    		let offset = 100 + 5 * this.sentientParticles.length;
+    		let targetX = X + Math.cos(angle) * offset; 
+    		let targetY = Y + Math.sin(angle) * offset; 
+    		char.x += (targetX - char.x) * 0.05;
+    		char.y += (targetY - char.y) * 0.05;
+
+    		let cos = Math.cos(angle + Math.PI);
+    		let sin = Math.sin(angle + Math.PI);
+    		// If click, apply force to all particles nearby 
+    		if (this.input.mousePointer.isDown) {
+    			for(let particle of this.sentientParticles) {
+    				let dx = particle.x - char.x; 
+    				let dy = particle.y - char.y; 
+    				let dist = Math.sqrt(dx * dx + dy * dy);
+    				let strengthFactor = (dist / 400);
+    				if(strengthFactor > 1) strengthFactor = 1; 
+    				strengthFactor = Math.sqrt(1 - strengthFactor, 4);
+    				let maxParticles = 30;
+    				let factor = 1.0 - (Math.min(this.sentientParticles.length, maxParticles) / maxParticles);
+
+    				Matter.Body.setVelocity(particle.body, {
+    					x: strengthFactor * 10 * cos * factor,
+    					y: strengthFactor * 10 * sin * factor
+    				})
+
+    				// Matter.Body.applyForce(particle.body, 
+    				// 	{x:char.x, y:char.y}, {
+    				// 	x:cos * strengthFactor, y: sin * strengthFactor * yMultiplier
+    				// })
+    			}
+    		}
+
+    	}
+
+    	
     }
 
     killDisconnectedSentience() {
@@ -332,8 +404,11 @@ class Game extends Phaser.Scene {
 
         this.face.x = sentientAvgX; 
         this.face.y = sentientAvgY;
+
         let factor = Math.min(sentientLength, 10) / 10;
         this.face.setScale(0.1 + factor * 0.2)
+        this.windCharacterUpdate(sentientAvgX, sentientAvgY);
+
     }
 }
 
