@@ -82,9 +82,23 @@ class Game extends Phaser.Scene {
         var map_scale = 10;
         var map_w = img.width * map_scale;
         var map_h = img.height * map_scale;
-    	var W = map_w;
+    	var W = map_w * 2;
     	var H = map_h;
+        var game_w = this.game.config.width;
+    	var game_h = this.game.config.height;
 
+        // Init background graphics
+        var back_sky = this.add.graphics();
+        var top_color = 0x8fe3e2;
+        var bottom_color = 0xe9ffde;
+        back_sky.fillGradientStyle(top_color, top_color, bottom_color, bottom_color, 1);
+        back_sky.fillRect(0, 0, W, H);
+        var back_mtn1 = this.add.image(game_w/2-50, game_h/2+80, 'mtn1').setScrollFactor(.02);
+        var back_mtn2 = this.add.image(game_w/2+550, game_h/2+80, 'mtn2').setScrollFactor(.04);
+        var mtn3_tex = this.textures.get('mtn3');
+        var back_mtn3 = this.add.tileSprite(game_w, game_h/2+150, W, mtn3_tex.getSourceImage().height, 'mtn3').setScrollFactor(.06);
+        back_mtn3.setTilePosition(120, 0);
+        
     	this.markSentient(this.createParticle(500,0, 1))
     	this.createParticle(600,0, 1)
     	for(let i = 0;i < 10;i++){
@@ -145,8 +159,9 @@ class Game extends Phaser.Scene {
         }
         var mask = mask_shape.createGeometryMask();
 
-        ground.setMask(mask);
-
+        ground.setMask(mask);        
+        
+        // Init character face
 		this.face = this.add.image(0,0, 'face_normal');
 		this.face.setOrigin(0.5);
 		this.face.setScale(0.1);
@@ -311,7 +326,7 @@ class Game extends Phaser.Scene {
         	}
         }
 
-        // Average the x and y of the sentient 
+        // Average the x and y of the sentient and update camera view
         var W = this.game.config.width;
     	var H = this.game.config.height;
         sentientAvgX /= this.sentientParticles.length;
@@ -330,7 +345,9 @@ class Game extends Phaser.Scene {
         this.face.x = sentientAvgX; 
         this.face.y = sentientAvgY;
         let factor = Math.min(this.sentientParticles.length, 10) / 10;
-        this.face.setScale(0.1 + factor * 0.5)
+        this.face.setScale(0.1 + factor * 0.2);
+        
+        // Update parallax backgrounds
     }
 }
 

@@ -36,6 +36,9 @@ class Loading extends Phaser.Scene {
     	this.load.image('pixel-red', 'assets/particles/pixel-red.png');
     	this.load.image('snow', 'assets/particles/snow.png');
         this.load.image('stone-tile', 'assets/stone_tile.png');
+        this.load.image('mtn1', 'assets/back_mtn1.png');
+        this.load.image('mtn2', 'assets/back_mtn2.png');
+        this.load.image('mtn3', 'assets/back_mtn3.png');
         this.load.image('face_normal', 'assets/face_normal.png');
     	// Levels
     	this.load.image('level1', 'assets/levels/level1.png');
