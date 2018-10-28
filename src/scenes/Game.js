@@ -112,6 +112,24 @@ class Game extends Phaser.Scene {
 
         ground.setMask(mask);
     }
+    
+    updateFace(me, face, state) {
+        face.state = state;
+        switch(face.state) {
+            case 'scared':
+                face.setTexture('face_scared');
+                break;
+            case 'hurt':
+                face.setTexture('face_hurt');
+                setTimeout(function() {
+                    if (face.state == 'hurt') { me.updateFace(me, face, 'normal'); }
+                }, 1500);
+                break;
+            case 'normal':
+            default:
+                face.setTexture('face_normal');
+        }
+    }
 
     create() {    	
     	this.particles = [];
@@ -156,10 +174,6 @@ class Game extends Phaser.Scene {
     		this.createParticle(600 + i * 50,600, 1)
     	}
 
-    	// for(let i = 0;i < 50;i++){
-    	// 	this.createParticle(800 + Math.random() * 200, 0)
-    	// }
-
     	this.matter.world.setBounds(0, 0, W, H);
 
     	this.matter.add.mouseSpring();
@@ -171,7 +185,7 @@ class Game extends Phaser.Scene {
 		this.face = this.add.image(0,0, 'face_normal');
 		this.face.setOrigin(0.5);
 		this.face.setScale(0.1);
-
+        this.updateFace(this, this.face, 'hurt');
 
 		this.windChar = this.add.image(300,200, 'stone');
 		this.windChar.setOrigin(0.5)
@@ -350,6 +364,7 @@ class Game extends Phaser.Scene {
 
         	// Check if the distance between particle1 and all its joint particles is too big, 
         	// and if so, destroy the joint
+            let broke_apart_times = 0;
         	for(let key in particle1.joints) {
     			let joint = particle1.joints[key]
     			let particle2 = this.particleKeys[key]
@@ -361,9 +376,10 @@ class Game extends Phaser.Scene {
     				delete particle1.joints[key];
     				this.matter.world.removeConstraint(joint);
     				this.killDisconnectedSentience();
+                    broke_apart_times++;
     			}
-    			
-    		}
+            }
+            if (broke_apart_times > 2) {this.updateFace(this, this.face, 'hurt');}
 
         	for(let j = 0; j < this.particles.length; j++) {
         		let particle2 = this.particles[j];

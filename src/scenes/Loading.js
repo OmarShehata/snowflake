@@ -40,6 +40,8 @@ class Loading extends Phaser.Scene {
         this.load.image('mtn2', 'assets/back_mtn2.png');
         this.load.image('mtn3', 'assets/back_mtn3.png');
         this.load.image('face_normal', 'assets/face_normal.png');
+        this.load.image('face_scared', 'assets/face_scared.png');
+        this.load.image('face_hurt', 'assets/face_hurt.png');
     	// Levels
     	this.load.image('level1', 'assets/levels/level1.png');
     	this.load.image('level3', 'assets/levels/level3.png');
